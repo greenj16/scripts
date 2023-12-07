@@ -40,6 +40,7 @@ if [[ "$ubu_web" == "$current_ip" ]]; then
             scp ./wazuh-certificates.tar 
         fi
     done < $file_path
+
 COMMENTS
 
     # installing nessesary packages
@@ -56,7 +57,26 @@ COMMENTS
 
     apt-get -y install wazuh-indexer
 
+    # configuring the Wazuh indexer
+    sed -i "s/0.0.0.0/$ubu_web/" /etc/wazuh-indexer/opensearch.yml
 
+    # deploying cert
+    NODE_NAME=node-1
+
+    mkdir /etc/wazuh-indexer/certs
+    tar -xf ./wazuh-certificates.tar -C /etc/wazuh-indexer/certs ./$NODE_NAME.pem ./$NODE_NAME-key.pem ./admin.pem ./admin-kep.pem ./root-ca.pem
+    mv -n /etc/wazuh-indexer/certs/$NODE_NAME.pem /etc/wazuh-indexer/certs/indexer.pem
+    mv -n /etc/wazuh-indexer/certs/$NODE_NAME-key.pem /etc/wazuh-indexer/certs/indexer-key.pem
+    chmod 500 /etc/wazuh-indexer/certs
+    chmod 400 /etc/wazuh-indexer/certs/*
+    chown -R wazuh-indexer:wazuh-indexer /etc/wazuh-indexer/certs
+
+    # starting indexer
+    echo "****************************************"
+    echo "*          Starting indexer...         *"
+    echo "****************************************"
+    update-rc.d wazuh-indexer defaults 95 10
+    service wazuh-indexer start
 
 else
     echo "please run this on the Ubuntu Web host..."
