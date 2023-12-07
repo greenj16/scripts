@@ -10,8 +10,8 @@ if [[ "$ubu_web" == "$current_ip" ]]; then
     sed -i 's/#\?\(vm.max_map_count=\s*\).*$/vm.max_map_count=262144/' /etc/sysctl.conf
 
     #download files to create ssl certs
-    curl -sO https://packages.wazuh.com/4.7/wazuh-certs-tool.sh
-    curl -sO https://packages.wazuh.com/4.7/config.yml
+    curl -kO https://packages.wazuh.com/4.7/wazuh-certs-tool.sh
+    curl -kO https://packages.wazuh.com/4.7/config.yml
 
     #configure yml to include ubuntu web ip as server
     sed -i "s/<indexer-node-ip>/$ubu_web/" ./config.yml
@@ -64,7 +64,7 @@ COMMENTS
     NODE_NAME=node-1
 
     mkdir /etc/wazuh-indexer/certs
-    tar -xf ./wazuh-certificates.tar -C /etc/wazuh-indexer/certs ./$NODE_NAME.pem ./$NODE_NAME-key.pem ./admin.pem ./admin-kep.pem ./root-ca.pem
+    tar -xf ./wazuh-certificates.tar -C /etc/wazuh-indexer/certs ./$NODE_NAME.pem ./$NODE_NAME-key.pem ./admin.pem ./admin-key.pem ./root-ca.pem
     mv -n /etc/wazuh-indexer/certs/$NODE_NAME.pem /etc/wazuh-indexer/certs/indexer.pem
     mv -n /etc/wazuh-indexer/certs/$NODE_NAME-key.pem /etc/wazuh-indexer/certs/indexer-key.pem
     chmod 500 /etc/wazuh-indexer/certs
