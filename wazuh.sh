@@ -78,6 +78,22 @@ COMMENTS
     update-rc.d wazuh-indexer defaults 95 10
     service wazuh-indexer start
 
+
+    # cluster initalization
+    /usr/share/wazuh-indexer/bin/indexer-security-init.sh
+
+    # test init
+    curl -k -u admin:admin https://$ubu_web:9200
+    curl -k -u admin:admin https://$ubu_web:9200/_cat/nodes?v
+
+    # end of indexer steps #
+
+
+    # Wazuh Server installation
+
+    
+
+
 else
     echo "please run this on the Ubuntu Web host..."
 fi
