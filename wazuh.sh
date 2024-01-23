@@ -75,8 +75,11 @@ COMMENTS
     echo "****************************************"
     echo "*          Starting indexer...         *"
     echo "****************************************"
-    update-rc.d wazuh-indexer defaults 95 10
-    service wazuh-indexer start
+    # update-rc.d wazuh-indexer defaults 95 10
+    systemctl daemon-reload
+    systemctl enable wazuh-indexer
+    systemctl start wazuh-indexer
+    # service wazuh-indexer start
 
 
     # cluster initalization
@@ -91,7 +94,7 @@ COMMENTS
 
     # Wazuh Server installation
 
-    
+
 
 
 else
