@@ -36,90 +36,23 @@ function enable_ipv6() {
 
 function deb_config_ipv6() {
 
-    cat <<EOF >> /etc/netplan/01-netcfg.yaml
-        
-network:
-    version: 2
-    renderer: networkd
-    ethernets:
-        ens33:
-            dhcp4: no
-            dhcp6: no
-            addresses:
-            - 172.20.240.20/24 #ubu_wrk IP
-            - 2001:db8:2::200/64 # randomly crafted IP with same prefix as ubu_web
-            routes:
-                - to: default   #default IPv4
-                  via: 172.20.240.254 # gateway?
-                - to: "::/0"   #default IPv6
-                  via: 2001:db1:2::1
-                  on-link: true
-            nameservers:
-                addresses:
-                - 172.20.240.20
-EOF
-
-    netplan apply
+    ip -6 addr add 2001:db8:2::200/64 dev ens33
+    ip -6 route add  default via 2001:db8:2::1 dev ens33
 
 }
 
 
 function ubu_web_config_ipv6() {
 
-    cat <<EOF >> /etc/netplan/01-netcfg.yaml
-        
-network:
-    version: 2
-    renderer: networkd
-    ethernets:
-        ens33:
-            dhcp4: no
-            dhcp6: no
-            addresses:
-            - 172.20.242.10/24 #ubu_wrk IP
-            - 2001:db8:1::200/64 # randomly crafted IP with same prefix as ubu_web
-            routes:
-                - to: default   #default IPv4
-                  via: 172.20.242.254 # gateway?
-                - to: "::/0"   #default IPv6
-                  via: 2001:db1:1::1
-                  on-link: true
-            nameservers:
-                addresses:
-                - 172.20.240.20
-EOF
-
-    netplan apply
+    ip -6 addr add 2001:db8:1::200/64 dev ens33
+    ip -6 route add  default via 2001:db8:1::1 dev ens33
 
 }
 
 function ubu_work_config_ipv6() {
 
-    mv /etc/netplan/01-netcfg.yaml /etc/netplan/01-netcfg.yaml.bak
-    cat <<EOF >> /etc/netplan/01-netcfg.yaml
-        
-network:
-    version: 2
-    renderer: networkd
-    ethernets:
-        ens33:
-            dhcp4: no
-            dhcp6: no
-            addresses:
-            - 172.20.242.120/24 #ubu_wrk IP
-            - 2001:db8:1::100/64 # randomly crafted IP with same prefix as ubu_web
-            routes:
-                - to: default   #default IPv4
-                  via: 172.20.242.254 # gateway?
-                - to: "::/0"   #default IPv6
-                  via: 2001:db1:1::1
-                  on-link: true
-            nameservers:
-                addresses:
-                - 172.20.240.20
-EOF
-
-    netplan apply
+    ip -6 addr add 2001:db8:1::100/64 dev ens33
+    ip -6 route add default via 2001:db8:1::1 dev ens33
 
 }
 
@@ -128,7 +61,7 @@ function panic(){
     exit -1
 }
 
-
+function main {
 # prompt user for host name
 prompt "${GREEN}What is your host?: ${YELLOW}ubu_web, ubu_work, deb${NC}" host
 
@@ -152,8 +85,22 @@ if [[ "${3}" == "ubu_work"]]; then
 
 fi
 
+# debian commands
+if [[ "${3}" == "deb"]]; then
+    
+    echo "${GREEN}Setting up ubu_work...${NC}"
+
+    enable_ipv6 || panic
+    ubu_work_config_ipv6 || panic
+
+fi
+
+exit 0
+}
 
 if [ "$UID" != "0" ]; then
     echo "$0: ${RED}you must be root to configure this box.${NC}"
     exit -1
 fi
+
+main "$@"
