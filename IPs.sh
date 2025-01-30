@@ -1,10 +1,6 @@
-ubu_web="172.20.242.10"
-Docker="172.20.240.10"
-Debian="172.20.240.20"
-AD="172.20.242.200"
-ubu_wk="172.20.242.100"
-splunk="172.20.241.20"
-Centos="172.20.241.30"
-fedora="172.20.241.40"
-IP9=
-IP10=
+echo "      ${ORANGE}/\ ${NC}"
+        echo "    ${ORANGE}_/./ ${NC}"
+        echo "${ORANGE} ,-${RED}'    {$ORANGE}\`${RED}-:..${ORANGE}-'/ ${NC}"
+        echo "${ORANGE}: ${GREEN}o ${RED})      _  ${ORANGE}("
+        echo "${ORANGE}\"\`-..${RED}..,${ORANGE}--${RED}; \`${ORANGE}-.\ "
+        echo "${ORANGE}    \`${RED}'\""
