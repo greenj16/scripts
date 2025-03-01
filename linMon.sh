@@ -42,6 +42,7 @@ display_proc() {
 }
 '''
 
+'''
 # Continuously prompt the user for input
 while_loop=true
 while $while_loop; do
@@ -273,6 +274,7 @@ while $while_loop; do
     done
 done
 exit
+'''
 
 # Start a new tmux session
 tmux new-session -d -s my_session
