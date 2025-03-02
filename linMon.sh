@@ -11,7 +11,7 @@ fi
 
 update_process_list() {
     # Get the list of current processes and store it in the array
-    ps -eo pid,ppid,cmd --sort=start_time | tail | grep -Ev "splunk|\[|watch|tmux|tail|ps" > /tmp/new_processes
+    ps -eo pid,ppid,cmd --sort=start_time | tail | grep -Ev "splunk|\[|watch|tmux|tail|ps" > /var/zds/new_processes
 }
 
 # run watch in the background
@@ -40,7 +40,7 @@ tmux send-keys -t my_session.0 "
                     echo \"\${count}: \${line}\"
                 fi
                 ((count++))
-            done < \"/tmp/new_processes\"
+            done < \"/var/zds/new_processes\"
             sleep 2
         done
     }
@@ -65,7 +65,7 @@ while \$while_loop; do
             clear
             read -p '\033[32mEnter the PID to investigate: \033[0m' pid_input
 
-            ps -co pid,cmd,user,lstart > /tmp/t.txt
+            ps -co pid,cmd,user,lstart > /var/zds/t.txt
 
             process=()
             while IFS= read -r line; do
@@ -111,9 +111,9 @@ while \$while_loop; do
                             echo ''
                         fi
                 fi
-            done < \"/tmp/t.txt\"
+            done < \"/var/zds/t.txt\"
 
-            rm /tmp/t.txt
+            rm /var/zds/t.txt
             ;;
         '2')
             clear
@@ -170,7 +170,7 @@ while \$while_loop; do
             clear
             read -p '\033[32mEnter the PID to investigate: \033[0m' pid_input
 
-            ps -co pid,cmd,user,lstart > /tmp/t.txt
+            ps -co pid,cmd,user,lstart > /var/zds/t.txt
 
             process=()
             while IFS= read -r line; do
@@ -213,9 +213,9 @@ while \$while_loop; do
                             echo ''
                         fi
                 fi
-            done < \"/tmp/t.txt\"
+            done < \"/var/zds/t.txt\"
 
-            rm /tmp/t.txt
+            rm /var/zds/t.txt
             
             ps_output=\$(ps -co pid,cmd,user,lstart | grep \$pid_input)
             cmd=\$(echo \"\$ps_output\" | awk '{print \$2}')
@@ -285,4 +285,4 @@ tmux attach -t my_session
 echo "${GREEN}Cleaning up...${NC}"
 tmux kill-session -t my_session
 kill -9 $watch_pid
-rm /tmp/new_processes
+rm /var/zds/new_processes
