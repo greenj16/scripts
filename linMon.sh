@@ -13,13 +13,13 @@ update_process_list() {
     trap "exit" SIGINT SIGTERM
     # Get the list of current processes and store it in the array
     while true; do
-        ps -eo pid,ppid,cmd --sort=start_time | tail | grep -Ev "splunk|\[|watch|tmux|tail|ps" > /var/zds/new_processes
+        ps -eo pid,ppid,cmd,user --sort=start_time | tail | grep -Ev "splunk|\[|watch|tmux|tail|ps" > /var/zds/new_processes
         sleep 2
     done
 }
 
 # run watch in the background
-loop &
+update_process_list &
 loop_pid=$!
 
 cat << 'EOF' > /var/zds/temp_function.sh
@@ -76,22 +76,26 @@ while $while_loop; do
                         echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
                         echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
                         echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                        if [[ $listen_state -eq "ESTABLISHED" ]]; then
-                            echo "${GREEN}Process network status: ${RED}${listen_state}${NC}"
-                            echo "${GREEN}Destination address: ${RED}${dip}${NC}"
-                            echo ""
-                            echo "${RED}CONNECTION ESTABLISHED${GREEN} - Check logs for malicous activity from ${RED}${dip}${NC}"
-                            echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
-                            echo ""
-                            echo ""
-                        else
-                            echo "${GREEN}Process network status: ${YELLOW}${listen_state}${NC}"
-                            echo "${GREEN}Destination address: ${YELLOW}${dip}${NC}"
-                            echo ""
-                            echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
-                            echo ""
-                            echo ""
-                        fi
+                        echo "${GREEN}Process network status: ${YELLOW}${listen_state}${NC}"
+                        echo "${GREEN}Destination address: ${YELLOW}${dip}${NC}"
+                        echo ""
+                        echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
+                        echo ""
+                        echo ""
+                    else
+                        clear
+                        echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
+                        echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
+                        echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
+                        echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
+                        echo "${GREEN}Process network status: ${RED}${listen_state}${NC}"
+                        echo "${GREEN}Destination address: ${RED}${dip}${NC}"
+                        echo ""
+                        echo "${RED}CONNECTION ESTABLISHED${GREEN} - Check logs for malicous activity from ${RED}${dip}${NC}"
+                        echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
+                        echo ""
+                        echo ""
+                    fi
                 fi
             done < "/var/zds/t.txt"
 
@@ -181,19 +185,26 @@ while $while_loop; do
                         echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
                         echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
                         echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                        if [[ $listen_state -eq "ESTABLISHED" ]]; then
-                            echo "${GREEN}Process network status: ${RED}${listen_state}${NC}"
-                            echo "${GREEN}Destination address: ${RED}${dip}${NC}"
-                            echo ""
-                            echo "${RED}CONNECTION ESTABLISHED${GREEN} - Check logs for malicous activity from ${RED}${dip}${NC}"
-                            echo ""
-                            echo ""
-                        else
-                            echo "${GREEN}Process network status: ${YELLOW}${listen_state}${NC}"
-                            echo "${GREEN}Destination address: ${YELLOW}${dip}${NC}"
-                            echo ""
-                            echo ""
-                        fi
+                        echo "${GREEN}Process network status: ${YELLOW}${listen_state}${NC}"
+                        echo "${GREEN}Destination address: ${YELLOW}${dip}${NC}"
+                        echo ""
+                        echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
+                        echo ""
+                        echo ""
+                    else
+                        clear
+                        echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
+                        echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
+                        echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
+                        echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
+                        echo "${GREEN}Process network status: ${RED}${listen_state}${NC}"
+                        echo "${GREEN}Destination address: ${RED}${dip}${NC}"
+                        echo ""
+                        echo "${RED}CONNECTION ESTABLISHED${GREEN} - Check logs for malicous activity from ${RED}${dip}${NC}"
+                        echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
+                        echo ""
+                        echo ""
+                    fi
                 fi
             done < "/var/zds/t.txt"
 
@@ -281,7 +292,7 @@ tmux send-keys -t my_session.0 "
             while IFS= read -r line; do
                 # skips the first line
                 if [ \$count -eq 0 ]; then
-                    echo \"Line num, PID, PPID, CMD\"
+                    echo \"Line num, PID, PPID, CMD, User\"
                 else
                     echo \"\${count}: \${line}\"
                 fi
@@ -294,13 +305,14 @@ tmux send-keys -t my_session.0 "
 tmux send-keys -t my_session.0 'display_proc' C-m
 
 # Allow user input in the bottom pane
-tmux send-keys -t my_session.1 "/var/zds/temp_funciton.sh" C-m
+
+tmux send-keys -t my_session.1 "/var/zds/temp_function.sh" C-m
 
 # Attach to the tmux session
 tmux attach -t my_session
 
 echo "${GREEN}Cleaning up...${NC}"
 tmux kill-session -t my_session
-kill $watch_pid
+kill $loop_pid
 rm /var/zds/new_processes
-rm /var/zds/temp_funciton.sh
+rm /var/zds/temp_function.sh
