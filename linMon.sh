@@ -13,7 +13,7 @@ update_process_list() {
     trap "exit" SIGINT SIGTERM
     # Get the list of current processes and store it in the array
     while true; do
-        ps -eo pid,ppid,cmd,user --sort=start_time | tail | grep -Ev "splunk|\[|watch|tmux|tail|ps" > /var/zds/new_processes
+        ps -eo pid,ppid,cmd,user --sort=start_time | tail | grep -Ev "splunk|\[|watch|tmux|tail|ps|sleepl" > /var/zds/new_processes
         sleep 2
     done
 }
@@ -47,71 +47,60 @@ while $while_loop; do
             clear
             read -p "${GREEN}Enter the PID to investigate: ${NC}" pid_input
 
-            ps -co pid,cmd,user,lstart > /var/zds/t.txt
+            cmd="$(ps -co cmd -p ${pid_input} | grep -Ev 'CMD')"
+            ps_user="$(ps -o user -p ${pid_input} | grep -Ev 'USER')"
+            time_start="$(ps -o lstart -p ${pid_input} | grep -Ev 'STARTED' | awk '{print $4}')"
+            cmd_line="$(ps -o cmd -p ${pid_input} | grep -Ev 'CMD')"
+            location=$(find / -name $cmd)
 
-            process=()
-            while IFS= read -r line; do
-                IFS=' ' read -r -a line_array <<< "$line"
-                if [[ ${line_array[0]} -eq $pid_input ]]; then
+            netstat_line=$(netstat -peanut | grep -w $pid_input)
+            if [[ $netstat_line -eq "" ]]; then
+                listen_state="This process is not using network connections"
+                dip="This process is not using network connections"
+            else
+                listen_state=$(echo "$netstat_line" | awk '{print $6}')
+                dip=$(echo "$netstat_line" | awk '{print $5}')
+            fi
 
-                    cmd="${line_array[1]}"
-                    ps_user="${line_array[2]}"
-                    time_start="${line_array[6]}"
-                    cmd_line=$(ps -o cmd,pid | grep -w $pid_input | awk '{print $1}')
-                    location=$(find / -name $cmd)
+            if [[ $listen_state -eq "LISTEN" ]]; then
 
-                    netstat_line=$(netstat -peanut | grep -w $pid_input)
-                    if [[ $netstat_line -eq "" ]]; then
-                        listen_state="This process is not using network connections"
-                        dip="This process is not using network connections"
-                    else
-                        listen_state=$(echo "$netstat_line" | awk '{print $6}')
-                        dip=$(echo "$netstat_line" | awk '{print $5}')
-                    fi
-
-                    if [[ $listen_state -eq "LISTEN" ]]; then
-
-                        clear
-                        echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
-                        echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
-                        echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
-                        echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                        echo "${GREEN}Process network status: ${YELLOW}${listen_state}${NC}"
-                        echo "${GREEN}Destination address: ${YELLOW}${dip}${NC}"
-                        echo ""
-                        echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
-                        echo ""
-                        echo ""
-                    elif [[ $listen_state -eq "ESTABLISHED" ]]; then
-                        clear
-                        echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
-                        echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
-                        echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
-                        echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                        echo "${GREEN}Process network status: ${RED}${listen_state}${NC}"
-                        echo "${GREEN}Destination address: ${RED}${dip}${NC}"
-                        echo ""
-                        echo "${RED}CONNECTION ESTABLISHED${GREEN} - Check logs for malicous activity from ${RED}${dip}${NC}"
-                        echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
-                        echo ""
-                        echo ""
-                    else
-                        clear
-                        echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
-                        echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
-                        echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
-                        echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                        echo "${GREEN}Process network status: ${Green}${listen_state}${NC}"
-                        echo "${GREEN}Destination address: ${Green}${dip}${NC}"
-                        echo ""
-                        echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
-                        echo ""
-                        echo ""
-                    fi
-                fi
-            done < "/var/zds/t.txt"
-
-            rm /var/zds/t.txt
+                clear
+                echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
+                echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
+                echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
+                echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
+                echo "${GREEN}Process network status: ${YELLOW}${listen_state}${NC}"
+                echo "${GREEN}Destination address: ${YELLOW}${dip}${NC}"
+                echo ""
+                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
+                echo ""
+                echo ""
+            elif [[ $listen_state -eq "ESTABLISHED" ]]; then
+                clear
+                echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
+                echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
+                echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
+                echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
+                echo "${GREEN}Process network status: ${RED}${listen_state}${NC}"
+                echo "${GREEN}Destination address: ${RED}${dip}${NC}"
+                echo ""
+                echo "${RED}CONNECTION ESTABLISHED${GREEN} - Check logs for malicous activity from ${RED}${dip}${NC}"
+                echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
+                echo ""
+                echo ""
+            else
+                clear
+                echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
+                echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
+                echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
+                echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
+                echo "${GREEN}Process network status: ${Green}${listen_state}${NC}"
+                echo "${GREEN}Destination address: ${Green}${dip}${NC}"
+                echo ""
+                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
+                echo ""
+                echo ""
+            fi
             ;;
         "2")
             clear
@@ -168,74 +157,64 @@ while $while_loop; do
             clear
             read -p "${GREEN}Enter the PID to investigate: ${NC}" pid_input
 
-            ps -co pid,cmd,user,lstart > /var/zds/t.txt
+            cmd="$(ps -co cmd -p ${pid_input} | grep -Ev 'CMD')"
+            ps_user="$(ps -o user -p ${pid_input} | grep -Ev 'USER')"
+            time_start="$(ps -o lstart -p ${pid_input} | grep -Ev 'STARTED' | awk '{print $4}')"
+            cmd_line="$(ps -o cmd -p ${pid_input} | grep -Ev 'CMD')"
+            location=$(find / -name $cmd)
 
-            process=()
-            while IFS= read -r line; do
-                IFS=' ' read -r -a line_array <<< "$line"
-                if [[ ${line_array[0]} -eq $pid_input ]]; then
+            netstat_line=$(netstat -peanut | grep -w $pid_input)
+            if [[ $netstat_line -eq "" ]]; then
+                listen_state="This process is not using network connections"
+                dip="This process is not using network connections"
+            else
+                listen_state=$(echo "$netstat_line" | awk '{print $6}')
+                dip=$(echo "$netstat_line" | awk '{print $5}')
+            fi
 
-                    cmd="${line_array[1]}"
-                    ps_user="${line_array[2]}"
-                    time_start="${line_array[6]}"
-                    cmd_line=$(ps -o cmd,pid | grep -w $pid_input | awk '{print $1}')
-                    location=$(find / -name $cmd)
+            if [[ $listen_state -eq "LISTEN" ]]; then
 
-                    netstat_line=$(netstat -peanut | grep -w $pid_input)
-                    if [[ $netstat_line -eq "" ]]; then
-                        listen_state="This process is not using network connections"
-                        dip="This process is not using network connections"
-                    else
-                        listen_state=$(echo "$netstat_line" | awk '{print $6}')
-                        dip=$(echo "$netstat_line" | awk '{print $5}')
-                    fi
+                clear
+                echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
+                echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
+                echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
+                echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
+                echo "${GREEN}Process network status: ${YELLOW}${listen_state}${NC}"
+                echo "${GREEN}Destination address: ${YELLOW}${dip}${NC}"
+                echo ""
+                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
+                echo ""
+                echo ""
+            elif [[ $listen_state -eq "ESTABLISHED" ]]; then
+                clear
+                echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
+                echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
+                echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
+                echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
+                echo "${GREEN}Process network status: ${RED}${listen_state}${NC}"
+                echo "${GREEN}Destination address: ${RED}${dip}${NC}"
+                echo ""
+                echo "${RED}CONNECTION ESTABLISHED${GREEN} - Check logs for malicous activity from ${RED}${dip}${NC}"
+                echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
+                echo ""
+                echo ""
+            else
+                clear
+                echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
+                echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
+                echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
+                echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
+                echo "${GREEN}Process network status: ${Green}${listen_state}${NC}"
+                echo "${GREEN}Destination address: ${Green}${dip}${NC}"
+                echo ""
+                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
+                echo ""
+                echo ""
+            fi
 
-                    if [[ $listen_state -eq "LISTEN" ]]; then
-
-                        clear
-                        echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
-                        echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
-                        echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
-                        echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                        echo "${GREEN}Process network status: ${YELLOW}${listen_state}${NC}"
-                        echo "${GREEN}Destination address: ${YELLOW}${dip}${NC}"
-                        echo ""
-                        echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
-                        echo ""
-                        echo ""
-                    elif [[ $listen_state -eq "ESTABLISHED" ]]; then
-                        clear
-                        echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
-                        echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
-                        echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
-                        echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                        echo "${GREEN}Process network status: ${RED}${listen_state}${NC}"
-                        echo "${GREEN}Destination address: ${RED}${dip}${NC}"
-                        echo ""
-                        echo "${RED}CONNECTION ESTABLISHED${GREEN} - Check logs for malicous activity from ${RED}${dip}${NC}"
-                        echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
-                        echo ""
-                        echo ""
-                    else
-                        clear
-                        echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
-                        echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
-                        echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
-                        echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                        echo "${GREEN}Process network status: ${Green}${listen_state}${NC}"
-                        echo "${GREEN}Destination address: ${Green}${dip}${NC}"
-                        echo ""
-                        echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
-                        echo ""
-                        echo ""
-                    fi
-                fi
-            done < "/var/zds/t.txt"
-
-            rm /var/zds/t.txt
             
             ps_output=$(ps -co pid,cmd,user,lstart | grep $pid_input)
-            cmd=$(echo "$ps_output" | awk '{print $2}')
+            cmd="$(ps -co cmd -p ${pid_input} | grep -Ev 'CMD')"
             location=$(find / -name $cmd)
 
             IFS=' ' read -r -a locations <<< "$location"
@@ -255,7 +234,7 @@ while $while_loop; do
                         ;;
                     "all")
                         for index in "${!locations[@]}"; do
-                            echo "Moving all files to /var/zds/ ..."
+                            echo "Moving ${locations[$index]} to /var/zds/ ..."
                             mv "${locations[$index]}" "/var/zds/${cmd}_${index}"
                         done 
                         $bool=false
@@ -290,12 +269,14 @@ while $while_loop; do
 
     bool=true
     while $bool; do
-        read -p "${GREEN}Press enter to continue...${NC}" x
+        if [[ $while_loop == "true"]]; then
+            read -p "${GREEN}Press enter to continue...${NC}" x
+        fi
         bool=false
         clear
     done
 done
-exit
+tmux kill-session
 EOF
 
 chmod +x /var/zds/temp_function.sh
@@ -305,7 +286,7 @@ chmod +x /var/zds/temp_function.sh
 tmux new-session -d -s my_session
 
 # Split the tmux window into two panes
-tmux split-window -v
+tmux split-window -h
 
 # Run the echo script in the top pane
 tmux send-keys -t my_session.0 "
