@@ -32,7 +32,7 @@ NC=`tput sgr0`                              # Reset the text color
 # Continuously prompt the user for input
 while_loop=true
 while $while_loop; do
-
+    clear
     echo "################################"
     echo "# ${GREEN}1 Investigate${NC}                #"
     echo "# ${GREEN}2 Eradicate${NC}                  #"
@@ -215,9 +215,9 @@ while $while_loop; do
                 echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
                 echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
                 echo "${GREEN}Process network status: ${NC}"
-                echo "${Green}${listen_state}${NC}"
+                echo "${GREEN}${listen_state}${NC}"
                 echo "${GREEN}Destination address: ${NC}"
-                echo "${Green}${dip}${NC}"
+                echo "${GREEN}${dip}${NC}"
                 echo ""
                 echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
                 echo ""
@@ -281,10 +281,9 @@ while $while_loop; do
 
     bool=true
     while $bool; do
-        while $while_loop; do
+        if [ $while_loop == "true" ]; then
             read -p "${GREEN}Press enter to continue...${NC}" x
-            while_loop=false
-        done
+        fi
         bool=false
         clear
     done
