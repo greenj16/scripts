@@ -65,24 +65,28 @@ while $while_loop; do
             if [[ $listen_state -eq "LISTEN" ]]; then
 
                 clear
-                echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
+                echo "${GREEN}Command used: ${YELLOW}${cmd_line}${NC}"
                 echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
                 echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
                 echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                echo "${GREEN}Process network status: ${YELLOW}${listen_state}${NC}"
-                echo "${GREEN}Destination address: ${YELLOW}${dip}${NC}"
+                echo "${GREEN}Process network status: ${NC}"
+                echo "${YELLOW}${listen_state}${NC}"
+                echo "${GREEN}Destination address(es): ${NC}"
+                echo "${YELLOW}${dip}${NC}"
                 echo ""
                 echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
                 echo ""
                 echo ""
             elif [[ $listen_state -eq "ESTABLISHED" ]]; then
                 clear
-                echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
+                echo "${GREEN}Command used: ${YELLOW}${cmd_line}${NC}"
                 echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
                 echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
                 echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                echo "${GREEN}Process network status: ${RED}${listen_state}${NC}"
-                echo "${GREEN}Destination address: ${RED}${dip}${NC}"
+                echo "${GREEN}Process network status: ${NC}"
+                echo "${RED}${listen_state}${NC}"
+                echo "${GREEN}Destination address: ${NC}"
+                echo "${RED}${dip}${NC}"
                 echo ""
                 echo "${RED}CONNECTION ESTABLISHED${GREEN} - Check logs for malicous activity from ${RED}${dip}${NC}"
                 echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
@@ -90,12 +94,14 @@ while $while_loop; do
                 echo ""
             else
                 clear
-                echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
+                echo "${GREEN}Command used: ${YELLOW}${cmd_line}${NC}"
                 echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
                 echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
                 echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                echo "${GREEN}Process network status: ${Green}${listen_state}${NC}"
-                echo "${GREEN}Destination address: ${Green}${dip}${NC}"
+                echo "${GREEN}Process network status: ${NC}"
+                echo "${Green}${listen_state}${NC}"
+                echo "${GREEN}Destination address: ${NC}"
+                echo "${Green}${dip}${NC}"
                 echo ""
                 echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
                 echo ""
@@ -175,24 +181,28 @@ while $while_loop; do
             if [[ $listen_state -eq "LISTEN" ]]; then
 
                 clear
-                echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
+                echo "${GREEN}Command used: ${YELLOW}${cmd_line}${NC}"
                 echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
                 echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
                 echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                echo "${GREEN}Process network status: ${YELLOW}${listen_state}${NC}"
-                echo "${GREEN}Destination address: ${YELLOW}${dip}${NC}"
+                echo "${GREEN}Process network status: ${NC}"
+                echo "${YELLOW}${listen_state}${NC}"
+                echo "${GREEN}Destination address: ${NC}"
+                echo "${YELLOW}${dip}${NC}"
                 echo ""
                 echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
                 echo ""
                 echo ""
             elif [[ $listen_state -eq "ESTABLISHED" ]]; then
                 clear
-                echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
+                echo "${GREEN}Command used: ${YELLOW}${cmd_line}${NC}"
                 echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
                 echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
                 echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                echo "${GREEN}Process network status: ${RED}${listen_state}${NC}"
-                echo "${GREEN}Destination address: ${RED}${dip}${NC}"
+                echo "${GREEN}Process network status: ${NC}"
+                echo "${RED}${listen_state}${NC}"
+                echo "${GREEN}Destination address: ${NC}"
+                echo "${RED}${dip}${NC}"
                 echo ""
                 echo "${RED}CONNECTION ESTABLISHED${GREEN} - Check logs for malicous activity from ${RED}${dip}${NC}"
                 echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
@@ -200,12 +210,14 @@ while $while_loop; do
                 echo ""
             else
                 clear
-                echo "${GREEN}Command used: ${YELLOW}${cmd_line}{$NC}"
+                echo "${GREEN}Command used: ${YELLOW}${cmd_line}${NC}"
                 echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
                 echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
                 echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                echo "${GREEN}Process network status: ${Green}${listen_state}${NC}"
-                echo "${GREEN}Destination address: ${Green}${dip}${NC}"
+                echo "${GREEN}Process network status: ${NC}"
+                echo "${Green}${listen_state}${NC}"
+                echo "${GREEN}Destination address: ${NC}"
+                echo "${Green}${dip}${NC}"
                 echo ""
                 echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
                 echo ""
@@ -269,9 +281,10 @@ while $while_loop; do
 
     bool=true
     while $bool; do
-        if [[ $while_loop == "true"]]; then
+        while $while_loop; do
             read -p "${GREEN}Press enter to continue...${NC}" x
-        fi
+            while_loop=false
+        done
         bool=false
         clear
     done
