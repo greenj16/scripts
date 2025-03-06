@@ -133,7 +133,7 @@ while $while_loop; do
                     echo "${index}: ${YELLOW}${locations[$index]}${NC}"
                 done 
                 echo "${GREEN}Which file(s) do you want to move?${NC}"
-                read -p "${GREEN}Options: line number, 'all', 'none', 'manual' or enter to exit${NC}" user_input
+                read -p "${GREEN}Options: line number, 'all', 'none', 'manual' or enter to exit: ${NC}" user_input
                 case $user_input in
                     "none")
                         echo "No file locations moved..."
@@ -148,7 +148,7 @@ while $while_loop; do
                         ;;
                     "manual")
                         clear
-                        read -p "${GREEN}Options: line number, 'all', 'none', 'manual' or enter to exit${NC}" file_path
+                        read -p "${GREEN}Enter the file path you want to move: ${NC}" file_path
                         current_time=$(date +"%H:%M:%S")
                         echo "Moving ${file_path} to /var/zds/ ..."
                         mv "${file_path}" "/var/zds/${current_time}"
@@ -173,8 +173,23 @@ while $while_loop; do
                 esac
             done
 
-            echo "${RED}Killing PID=${YELLOW}${pid_input}${RED}...${NC}"
-            kill -9 $pid_input
+            bool=true
+            while $bool; do
+                clear
+                read -p "${GREEN}Kill the process? y or n ${NC}" answer
+                case $answer in
+                    "yes"|"y"|"Y")
+                        echo "${RED}Killing PID=${YELLOW}${pid_input}${RED}...${NC}"
+                        kill -9 $pid_input
+                        bool=false
+                        ;;
+                    "no"|"n"|"N")
+                        bool=false
+                        ;;
+                    *)
+                        ;;
+                esac
+            done
 
             ;;
         "3")
@@ -263,7 +278,7 @@ while $while_loop; do
                     echo "${index}: ${YELLOW}${locations[$index]}${NC}"
                 done 
                 echo "${GREEN}Which file(s) do you want to move?${NC}"
-                read -p "${GREEN}Options: line number, 'all', 'none', 'manual' or enter to exit${NC}" user_input
+                read -p "${GREEN}Options: line number, 'all', 'none', 'manual' or enter to exit: ${NC}" user_input
                 case $user_input in
                     "none")
                         echo "No file locations moved..."
@@ -278,7 +293,7 @@ while $while_loop; do
                         ;;
                     "manual")
                         clear
-                        read -p "${GREEN}Options: line number, 'all', 'none', 'manual' or enter to exit${NC}" file_path
+                        read -p "${GREEN}Enter the file path you want to move: ${NC}" file_path
                         current_time=$(date +"%H:%M:%S")
                         echo "Moving ${file_path} to /var/zds/ ..."
                         mv "${file_path}" "/var/zds/${current_time}"
@@ -303,8 +318,23 @@ while $while_loop; do
                 esac
             done
 
-            echo "${RED}Killing PID=${YELLOW}${pid_input}${RED}...${NC}"
-            kill -9 $pid_input
+            bool=true
+            while $bool; do
+                clear
+                read -p "${GREEN}Kill the process? y or n ${NC}" answer
+                case $answer in
+                    "yes"|"y"|"Y")
+                        echo "${RED}Killing PID=${YELLOW}${pid_input}${RED}...${NC}"
+                        kill -9 $pid_input
+                        bool=false
+                        ;;
+                    "no"|"n"|"N")
+                        bool=false
+                        ;;
+                    *)
+                        ;;
+                esac
+            done
 
             ;;
         "exit")
