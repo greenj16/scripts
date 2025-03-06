@@ -132,8 +132,8 @@ while $while_loop; do
                     echo "${GREEN}All locations of PUP:${NC}"
                     echo "${index}: ${YELLOW}${locations[$index]}${NC}"
                 done 
-                echo "${GREEN}Which file(S) do you want to move?${NC}"
-                read -p "${GREEN}Options: line number, 'all', or 'none'${NC}" user_input
+                echo "${GREEN}Which file(s) do you want to move?${NC}"
+                read -p "${GREEN}Options: line number, 'all', 'none', 'manual' or enter to exit${NC}" user_input
                 case $user_input in
                     "none")
                         echo "No file locations moved..."
@@ -141,9 +141,20 @@ while $while_loop; do
                         ;;
                     "all")
                         for index in "${!locations[@]}"; do
-                            echo "Moving all files to /var/zds/ ..."
+                            echo "Moving ${locations[$index]} to /var/zds/ ..."
                             mv "${locations[$index]}" "/var/zds/${cmd}_${index}"
                         done 
+                        bool=false
+                        ;;
+                    "manual")
+                        clear
+                        read -p "${GREEN}Options: line number, 'all', 'none', 'manual' or enter to exit${NC}" file_path
+                        current_time=$(date +"%H:%M:%S")
+                        echo "Moving ${file_path} to /var/zds/ ..."
+                        mv "${file_path}" "/var/zds/${current_time}"
+                        bool=false
+                        ;;
+                    "")
                         bool=false
                         ;;
                     *)
@@ -251,8 +262,8 @@ while $while_loop; do
                     echo "${GREEN}All locations of PUP:${NC}"
                     echo "${index}: ${YELLOW}${locations[$index]}${NC}"
                 done 
-                echo "${GREEN}Which file(S) do you want to move?${NC}"
-                read -p "${GREEN}Options: line number, 'all', or 'none'${NC}" user_input
+                echo "${GREEN}Which file(s) do you want to move?${NC}"
+                read -p "${GREEN}Options: line number, 'all', 'none', 'manual' or enter to exit${NC}" user_input
                 case $user_input in
                     "none")
                         echo "No file locations moved..."
@@ -263,6 +274,17 @@ while $while_loop; do
                             echo "Moving ${locations[$index]} to /var/zds/ ..."
                             mv "${locations[$index]}" "/var/zds/${cmd}_${index}"
                         done 
+                        bool=false
+                        ;;
+                    "manual")
+                        clear
+                        read -p "${GREEN}Options: line number, 'all', 'none', 'manual' or enter to exit${NC}" file_path
+                        current_time=$(date +"%H:%M:%S")
+                        echo "Moving ${file_path} to /var/zds/ ..."
+                        mv "${file_path}" "/var/zds/${current_time}"
+                        bool=false
+                        ;;
+                    "")
                         bool=false
                         ;;
                     *)
