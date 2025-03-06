@@ -62,25 +62,12 @@ while $while_loop; do
                 dip=$(echo "$netstat_line" | awk '{print $5}')
             fi
 
-            if [[ $listen_state -eq "LISTEN" ]]; then
+            if echo "$listen_state" | grep -q "ESTABLISHED"; then
 
                 clear
                 echo "${GREEN}Command used: ${YELLOW}${cmd_line}${NC}"
-                echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
-                echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
-                echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                echo "${GREEN}Process network status: ${NC}"
-                echo "${YELLOW}${listen_state}${NC}"
-                echo "${GREEN}Destination address(es): ${NC}"
-                echo "${YELLOW}${dip}${NC}"
-                echo ""
-                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
-                echo ""
-                echo ""
-            elif [[ $listen_state -eq "ESTABLISHED" ]]; then
-                clear
-                echo "${GREEN}Command used: ${YELLOW}${cmd_line}${NC}"
-                echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
+                echo "${GREEN}Where app is located: ${NC}"
+                echo "${YELLOW}${location}${NC}"
                 echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
                 echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
                 echo "${GREEN}Process network status: ${NC}"
@@ -92,16 +79,35 @@ while $while_loop; do
                 echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
                 echo ""
                 echo ""
-            else
+
+            elif echo "$listen_state" | grep -q "LISTEN" && ! echo "$listen_state" | grep -q "ESTABLISHED"; then
+
                 clear
                 echo "${GREEN}Command used: ${YELLOW}${cmd_line}${NC}"
-                echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
+                echo "${GREEN}Where app is located: ${NC}"
+                echo "${YELLOW}${location}${NC}"
                 echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
                 echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
                 echo "${GREEN}Process network status: ${NC}"
-                echo "${Green}${listen_state}${NC}"
+                echo "${YELLOW}${listen_state}${NC}"
+                echo "${GREEN}Destination address(es): ${NC}"
+                echo "${YELLOW}${dip}${NC}"
+                echo ""
+                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
+                echo ""
+                echo ""
+
+            else
+                clear
+                echo "${GREEN}Command used: ${YELLOW}${cmd_line}${NC}"
+                echo "${GREEN}Where app is located: ${NC}"
+                echo "${YELLOW}${location}${NC}"
+                echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
+                echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
+                echo "${GREEN}Process network status: ${NC}"
+                echo "${GREEN}${listen_state}${NC}"
                 echo "${GREEN}Destination address: ${NC}"
-                echo "${Green}${dip}${NC}"
+                echo "${GREEN}${dip}${NC}"
                 echo ""
                 echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
                 echo ""
@@ -126,18 +132,18 @@ while $while_loop; do
             echo ""
             bool=true
             while $bool; do
-                read -p "${GREEN}Enter the number of the location to move, enter 'none', or enter 'all': ${NC}" location_input
+                read -p "${GREEN}Enter the number of the location to move, enter 'none', or enter 'all': ${NC}" user_input
                 case $user_input in
                     "none")
                         echo "No file locations moved..."
-                        $bool=false
+                        bool=false
                         ;;
                     "all")
                         for index in "${!locations[@]}"; do
                             echo "Moving all files to /var/zds/ ..."
                             mv "${locations[$index]}" "/var/zds/${cmd}_${index}"
                         done 
-                        $bool=false
+                        bool=false
                         ;;
                     *)
                         IFS=' ' read -r -a indexes <<< "${!locations[@]}"
@@ -145,7 +151,7 @@ while $while_loop; do
                             if [ "$element" == "$user_input" ]; then
                                 echo "Moving ${locations[$user_input]} to /var/zds ..."
                                 mv "${locations[$index]}" "/var/zds/${cmd}_${user_input}"
-                                $bool=false
+                                bool=false
                             else    
                                 echo "Invalid response..."
                                 clear
@@ -178,25 +184,12 @@ while $while_loop; do
                 dip=$(echo "$netstat_line" | awk '{print $5}')
             fi
 
-            if [[ $listen_state -eq "LISTEN" ]]; then
+            if echo "$listen_state" | grep -q "ESTABLISHED"; then
 
                 clear
                 echo "${GREEN}Command used: ${YELLOW}${cmd_line}${NC}"
-                echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
-                echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
-                echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
-                echo "${GREEN}Process network status: ${NC}"
-                echo "${YELLOW}${listen_state}${NC}"
-                echo "${GREEN}Destination address: ${NC}"
-                echo "${YELLOW}${dip}${NC}"
-                echo ""
-                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
-                echo ""
-                echo ""
-            elif [[ $listen_state -eq "ESTABLISHED" ]]; then
-                clear
-                echo "${GREEN}Command used: ${YELLOW}${cmd_line}${NC}"
-                echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
+                echo "${GREEN}Where app is located: ${NC}"
+                echo "${YELLOW}${location}${NC}"
                 echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
                 echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
                 echo "${GREEN}Process network status: ${NC}"
@@ -208,10 +201,29 @@ while $while_loop; do
                 echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
                 echo ""
                 echo ""
+
+            elif echo "$listen_state" | grep -q "LISTEN" && ! echo "$listen_state" | grep -q "ESTABLISHED"; then
+
+                clear
+                echo "${GREEN}Command used: ${YELLOW}${cmd_line}${NC}"
+                echo "${GREEN}Where app is located: ${NC}"
+                echo "${YELLOW}${location}${NC}"
+                echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
+                echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
+                echo "${GREEN}Process network status: ${NC}"
+                echo "${YELLOW}${listen_state}${NC}"
+                echo "${GREEN}Destination address(es): ${NC}"
+                echo "${YELLOW}${dip}${NC}"
+                echo ""
+                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
+                echo ""
+                echo ""
+
             else
                 clear
                 echo "${GREEN}Command used: ${YELLOW}${cmd_line}${NC}"
-                echo "${GREEN}Where app is located: ${YELLOW}${location}${NC}"
+                echo "${GREEN}Where app is located: ${NC}"
+                echo "${YELLOW}${location}${NC}"
                 echo "${GREEN}Who ran it: ${YELLOW}${ps_user}${NC}"
                 echo "${GREEN}Start time: ${YELLOW}${time_start}${NC}"
                 echo "${GREEN}Process network status: ${NC}"
@@ -238,18 +250,18 @@ while $while_loop; do
             echo ""
             bool=true
             while $bool; do
-                read -p "${GREEN}Enter the number of the location to move, enter 'none', or enter 'all': ${NC}" location_input
+                read -p "${GREEN}Enter the number of the location to move, enter 'none', or enter 'all': ${NC}" user_input
                 case $user_input in
                     "none")
                         echo "No file locations moved..."
-                        $bool=false
+                        bool=false
                         ;;
                     "all")
                         for index in "${!locations[@]}"; do
                             echo "Moving ${locations[$index]} to /var/zds/ ..."
                             mv "${locations[$index]}" "/var/zds/${cmd}_${index}"
                         done 
-                        $bool=false
+                        bool=false
                         ;;
                     *)
                         IFS=' ' read -r -a indexes <<< "${!locations[@]}"
@@ -257,7 +269,7 @@ while $while_loop; do
                             if [ "$element" == "$user_input" ]; then
                                 echo "Moving ${locations[$user_input]} to /var/zds ..."
                                 mv "${locations[$index]}" "/var/zds/${cmd}_${user_input}"
-                                $bool=false
+                                bool=false
                             else    
                                 echo "Invalid response..."
                                 clear
