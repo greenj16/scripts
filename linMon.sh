@@ -51,7 +51,7 @@ while $while_loop; do
             ps_user="$(ps -o user -p ${pid_input} | grep -Ev 'USER')"
             time_start="$(ps -o lstart -p ${pid_input} | grep -Ev 'STARTED' | awk '{print $4}')"
             cmd_line="$(ps -o cmd -p ${pid_input} | grep -Ev 'CMD')"
-            location=$(find / -name $cmd)
+            location=$(readlink /proc/${pid_input}/exe)
 
             netstat_line=$(netstat -peanut | grep -w $pid_input)
             if [[ $netstat_line -eq "" ]]; then
@@ -75,8 +75,8 @@ while $while_loop; do
                 echo "${GREEN}Destination address: ${NC}"
                 echo "${RED}${dip}${NC}"
                 echo ""
-                echo "${RED}CONNECTION ESTABLISHED${GREEN} - Check logs for malicous activity from ${RED}${dip}${NC}"
-                echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
+                echo "${RED}CONNECTION ESTABLISHED${GREEN} - Check logs for malicious activity from ${RED}${dip}${NC}"
+                echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicious${NC}"
                 echo ""
                 echo ""
 
@@ -93,7 +93,7 @@ while $while_loop; do
                 echo "${GREEN}Destination address(es): ${NC}"
                 echo "${YELLOW}${dip}${NC}"
                 echo ""
-                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
+                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicious"
                 echo ""
                 echo ""
 
@@ -109,7 +109,7 @@ while $while_loop; do
                 echo "${GREEN}Destination address: ${NC}"
                 echo "${GREEN}${dip}${NC}"
                 echo ""
-                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
+                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicious"
                 echo ""
                 echo ""
             fi
@@ -119,31 +119,24 @@ while $while_loop; do
             read -p "${GREEN}Enter the PID to eradicate: ${NC}" pid_input
             clear
 
-            ps_output=$(ps -co pid,cmd,user,lstart | grep $pid_input)
-            cmd=$(echo "$ps_output" | awk '{print $2}')
-            location=$(find / -name $cmd)
-
-            IFS=' ' read -r -a locations <<< "$location" 
+            location=$(readlink /proc/${pid_input}/exe)
 
             echo ""
             bool=true
             while $bool; do
-                for index in "${!locations[@]}"; do
-                    echo "${GREEN}All locations of PUP:${NC}"
-                    echo "${index}: ${YELLOW}${locations[$index]}${NC}"
-                done 
-                echo "${GREEN}Which file(s) do you want to move?${NC}"
-                read -p "${GREEN}Options: line number, 'all', 'none', 'manual' or enter to exit: ${NC}" user_input
+                echo "${GREEN}File is located here:${NC}"
+                echo "${index}: ${YELLOW}${location}${NC}"
+
+                echo "${GREEN}Do you want to move the file?${NC}"
+                read -p "${GREEN}Options: y, n, 'manual', or enter to exit: ${NC}" user_input
                 case $user_input in
-                    "none")
+                    "n")
                         echo "No file locations moved..."
                         bool=false
                         ;;
-                    "all")
-                        for index in "${!locations[@]}"; do
-                            echo "Moving ${locations[$index]} to /var/zds/ ..."
-                            mv "${locations[$index]}" "/var/zds/${cmd}_${index}"
-                        done 
+                    "y")
+                        echo "Moving ${location} to /var/zds/ ..."
+                        mv "${location}" "/var/zds/${cmd}_${index}"
                         bool=false
                         ;;
                     "manual")
@@ -158,17 +151,8 @@ while $while_loop; do
                         bool=false
                         ;;
                     *)
-                        IFS=' ' read -r -a indexes <<< "${!locations[@]}"
-                        for element in "${indexes[@]}"; do
-                            if [ "$element" == "$user_input" ]; then
-                                echo "Moving ${locations[$user_input]} to /var/zds ..."
-                                mv "${locations[$index]}" "/var/zds/${cmd}_${user_input}"
-                                bool=false
-                            else    
-                                echo "Invalid response..."
-                                clear
-                            fi
-                        done
+                        echo "Invalid response..."
+                        clear
                         ;;
                 esac
             done
@@ -200,7 +184,7 @@ while $while_loop; do
             ps_user="$(ps -o user -p ${pid_input} | grep -Ev 'USER')"
             time_start="$(ps -o lstart -p ${pid_input} | grep -Ev 'STARTED' | awk '{print $4}')"
             cmd_line="$(ps -o cmd -p ${pid_input} | grep -Ev 'CMD')"
-            location=$(find / -name $cmd)
+            location=$(readlink /proc/${pid_input}/exe)
 
             netstat_line=$(netstat -peanut | grep -w $pid_input)
             if [[ $netstat_line -eq "" ]]; then
@@ -224,8 +208,8 @@ while $while_loop; do
                 echo "${GREEN}Destination address: ${NC}"
                 echo "${RED}${dip}${NC}"
                 echo ""
-                echo "${RED}CONNECTION ESTABLISHED${GREEN} - Check logs for malicous activity from ${RED}${dip}${NC}"
-                echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous${NC}"
+                echo "${RED}CONNECTION ESTABLISHED${GREEN} - Check logs for malicious activity from ${RED}${dip}${NC}"
+                echo "${GREEN}Please use the 'Eradicate' option [enter '2'] if this is confirmed malicious${NC}"
                 echo ""
                 echo ""
 
@@ -242,7 +226,7 @@ while $while_loop; do
                 echo "${GREEN}Destination address(es): ${NC}"
                 echo "${YELLOW}${dip}${NC}"
                 echo ""
-                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
+                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicious"
                 echo ""
                 echo ""
 
@@ -258,37 +242,30 @@ while $while_loop; do
                 echo "${GREEN}Destination address: ${NC}"
                 echo "${GREEN}${dip}${NC}"
                 echo ""
-                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicous"
+                echo "Please use the 'Eradicate' option [enter '2'] if this is confirmed malicious"
                 echo ""
                 echo ""
             fi
 
-            
-            ps_output=$(ps -co pid,cmd,user,lstart | grep $pid_input)
-            cmd="$(ps -co cmd -p ${pid_input} | grep -Ev 'CMD')"
-            location=$(find / -name $cmd)
 
-            IFS=' ' read -r -a locations <<< "$location"
+            location=$(readlink /proc/${pid_input}/exe)
 
             echo ""
             bool=true
             while $bool; do
-                for index in "${!locations[@]}"; do
-                    echo "${GREEN}All locations of PUP:${NC}"
-                    echo "${index}: ${YELLOW}${locations[$index]}${NC}"
-                done 
-                echo "${GREEN}Which file(s) do you want to move?${NC}"
-                read -p "${GREEN}Options: line number, 'all', 'none', 'manual' or enter to exit: ${NC}" user_input
+                echo "${GREEN}File is located here:${NC}"
+                echo "${index}: ${YELLOW}${location}${NC}"
+
+                echo "${GREEN}Do you want to move the file?${NC}"
+                read -p "${GREEN}Options: y, n, 'manual', or enter to exit: ${NC}" user_input
                 case $user_input in
-                    "none")
+                    "n")
                         echo "No file locations moved..."
                         bool=false
                         ;;
-                    "all")
-                        for index in "${!locations[@]}"; do
-                            echo "Moving ${locations[$index]} to /var/zds/ ..."
-                            mv "${locations[$index]}" "/var/zds/${cmd}_${index}"
-                        done 
+                    "y")
+                        echo "Moving ${location} to /var/zds/ ..."
+                        mv "${location}" "/var/zds/${cmd}_${index}"
                         bool=false
                         ;;
                     "manual")
@@ -303,17 +280,8 @@ while $while_loop; do
                         bool=false
                         ;;
                     *)
-                        IFS=' ' read -r -a indexes <<< "${!locations[@]}"
-                        for element in "${indexes[@]}"; do
-                            if [ "$element" == "$user_input" ]; then
-                                echo "Moving ${locations[$user_input]} to /var/zds ..."
-                                mv "${locations[$index]}" "/var/zds/${cmd}_${user_input}"
-                                bool=false
-                            else    
-                                echo "Invalid response..."
-                                clear
-                            fi
-                        done
+                        echo "Invalid response..."
+                        clear
                         ;;
                 esac
             done
