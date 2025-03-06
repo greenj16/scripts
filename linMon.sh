@@ -123,16 +123,17 @@ while $while_loop; do
             cmd=$(echo "$ps_output" | awk '{print $2}')
             location=$(find / -name $cmd)
 
-            IFS=' ' read -r -a locations <<< "$location"
-            for index in "${!locations[@]}"; do
-                echo "${GREEN}All locations of PUP:${NC}"
-                echo "${index}: ${YELLOW}${locations[$index]}${NC}"
-            done 
+            IFS=' ' read -r -a locations <<< "$location" 
 
             echo ""
             bool=true
             while $bool; do
-                read -p "${GREEN}Enter the number of the location to move, enter 'none', or enter 'all': ${NC}" user_input
+                for index in "${!locations[@]}"; do
+                    echo "${GREEN}All locations of PUP:${NC}"
+                    echo "${index}: ${YELLOW}${locations[$index]}${NC}"
+                done 
+                echo "${GREEN}Which file(S) do you want to move?${NC}"
+                read -p "${GREEN}Options: line number, 'all', or 'none'${NC}" user_input
                 case $user_input in
                     "none")
                         echo "No file locations moved..."
@@ -242,15 +243,16 @@ while $while_loop; do
             location=$(find / -name $cmd)
 
             IFS=' ' read -r -a locations <<< "$location"
-            for index in "${!locations[@]}"; do
-                echo "${GREEN}All locations of PUP:${NC}"
-                echo "${index}: ${YELLOW}${locations[$index]}${NC}"
-            done 
 
             echo ""
             bool=true
             while $bool; do
-                read -p "${GREEN}Enter the number of the location to move, enter 'none', or enter 'all': ${NC}" user_input
+                for index in "${!locations[@]}"; do
+                    echo "${GREEN}All locations of PUP:${NC}"
+                    echo "${index}: ${YELLOW}${locations[$index]}${NC}"
+                done 
+                echo "${GREEN}Which file(S) do you want to move?${NC}"
+                read -p "${GREEN}Options: line number, 'all', or 'none'${NC}" user_input
                 case $user_input in
                     "none")
                         echo "No file locations moved..."
